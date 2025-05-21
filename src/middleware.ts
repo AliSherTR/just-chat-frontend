@@ -13,7 +13,7 @@ export async function middleware(request: NextRequest) {
     // If user is already logged in and trying to access auth pages,
     // redirect them to the dashboard/home
     if (token) {
-      return NextResponse.redirect(new URL("/messages", request.url));
+      return NextResponse.redirect(new URL("/chats", request.url));
     }
     // Allow access to auth pages for non-logged in users
     return NextResponse.next();

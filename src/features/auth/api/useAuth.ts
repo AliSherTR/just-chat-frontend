@@ -29,6 +29,24 @@ export function useAuth() {
         throw new Error(errorData.error || "Login failed");
       }
       const data = await response.json();
+      localStorage.setItem("access_token", data.access_token);
+      return data;
+    } catch (error: any) {
+      throw error;
+    }
+  }
+
+  async function logoutUser() {
+    try {
+      const response = await fetch("/api/auth/logout", {
+        method: "POST",
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Logout failed");
+      }
+      const data = await response.json();
       return data;
     } catch (error: any) {
       throw error;
@@ -65,7 +83,29 @@ export function useAuth() {
           backgroundColor: "green",
         },
       });
-      router.push("/messages");
+      router.replace("/chats");
+    },
+    onError: (error) => {
+      toast.error(error.message, {
+        style: {
+          color: "white",
+          backgroundColor: "red",
+        },
+      });
+      return;
+    },
+  });
+
+  const logoutMutation = useMutation({
+    mutationFn: logoutUser,
+    onSuccess: (data) => {
+      toast.success(data.message, {
+        style: {
+          color: "white",
+          backgroundColor: "green",
+        },
+      });
+      router.push("/auth/login");
     },
     onError: (error) => {
       toast.error(error.message, {
@@ -87,7 +127,7 @@ export function useAuth() {
           backgroundColor: "green",
         },
       });
-      router.push("/messages");
+      router.push("/chats");
     },
     onError: (error) => {
       toast.error(error.message, {
@@ -105,6 +145,8 @@ export function useAuth() {
     login: loginMutation.mutate,
     loggingIn: loginMutation.isPending,
     loginError: loginMutation.error,
+    logout: logoutMutation.mutate,
+    logginOut: logoutMutation.isPending,
     signup: signupMutation.mutate,
     signupStatus: signupMutation.isPending,
     signupError: signupMutation.error,
