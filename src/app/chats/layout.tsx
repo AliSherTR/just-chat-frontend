@@ -17,7 +17,7 @@ export default function layout({
     <SidebarProvider>
       <AppSidebar />
 
-      <main className="w-full h-screen overflow-hidden">
+      <main className="w-full overflow-hidden">
         <AppHeader />
         {children}
       </main>

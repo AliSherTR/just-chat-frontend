@@ -44,7 +44,7 @@ export default function SingleChatItem({
 
   return (
     <Link href={`/chats/${chatGroupId}`}>
-      <div className="py-1 px-2 flex items-center border rounded-3xl gap-2 hover:bg-gray-100 transition">
+      <div className="py-1 px-2 flex items-center border rounded-3xl gap-2  transition">
         <div className="h-8 w-8 flex items-center justify-center rounded-full bg-gray-100 text-sm font-semibold text-gray-600">
           {partnerProfilePic ? (
             <img
@@ -57,15 +57,17 @@ export default function SingleChatItem({
           )}
         </div>
         <div className="text-xs flex-1">
-          <h1 className="font-semibold text-gray-800">{partnerName}</h1>
-          <span className="truncate text-gray-600">
+          <h1 className="font-semibold text-gray-800 dark:text-white">
+            {partnerName}
+          </h1>
+          <span className="truncate text-gray-600 dark:text-white">
             {lastMessage.isSentByUser ? "You: " : ""}
             {truncateMessage(lastMessage.content)}
             {lastMessage.emoji && ` ${lastMessage.emoji}`}
           </span>
         </div>
         <div className="justify-self-end text-xs">
-          <p className="text-right text-gray-500">
+          <p className="text-right text-gray-500 dark:text-white">
             {formatTimestamp(lastMessage.createdAt)}
           </p>
         </div>

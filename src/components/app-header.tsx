@@ -5,23 +5,23 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { User, Settings, Moon, LogOut } from "lucide-react";
+import { User, Settings, Moon, LogOut, Sun } from "lucide-react";
 import { DropdownMenuLabel, DropdownMenuSeparator } from "./ui/dropdown-menu";
 import {
   AlertDialog,
   AlertDialogContent,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { useAuth } from "@/features/auth/api/useAuth";
 import LogoutModal from "@/features/auth/components/logout-modal";
+import { useTheme } from "next-themes";
 
 const AppHeader = () => {
-  const { logginOut, logout } = useAuth();
+  const { theme, setTheme } = useTheme();
   return (
     <header className="bg-white shadow-md py-4">
       <div className="container mx-auto px-4 pe-8 flex items-center justify-end">
         <DropdownMenu>
-          <DropdownMenuTrigger className=" flex items-center gap-2">
+          <DropdownMenuTrigger className=" flex items-center gap-2 dark:text-black">
             <div className="rounded-full bg-gray-200 w-8 h-8 flex items-center justify-center">
               <User className="h-4 w-4" />
             </div>
@@ -41,9 +41,21 @@ const AppHeader = () => {
               <Settings className="h-4 w-4" />
               <span>Settings</span>
             </DropdownMenuItem>
-            <DropdownMenuItem className="flex items-center gap-2">
-              <Moon className="h-4 w-4" />
-              <span>Dark Mode</span>
+            <DropdownMenuItem
+              className="flex items-center gap-2"
+              onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+            >
+              {theme === "light" ? (
+                <>
+                  <Moon className="h-4 w-4" />
+                  <span>Dark Mode</span>
+                </>
+              ) : (
+                <>
+                  <Sun className="h-4 w-4" />
+                  <span>Light Mode</span>
+                </>
+              )}
             </DropdownMenuItem>
 
             <DropdownMenuSeparator />

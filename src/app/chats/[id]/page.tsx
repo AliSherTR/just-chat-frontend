@@ -17,22 +17,22 @@ export default function SingleChat() {
   };
 
   return (
-    <div className="flex h-full flex-col bg-gray-100">
+    <div className="flex flex-col h-[calc(100vh-64px)] bg-gray-100">
       {/* Chat Header */}
-      <div className="bg-white shadow-sm p-2 flex items-center">
+      <div className="bg-white shadow-sm p-4 flex items-center shrink-0">
         <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
           <span className="text-gray-600 font-semibold">U</span>{" "}
           {/* Placeholder for user avatar */}
         </div>
         <div className="ml-3">
-          <h2 className="text-sm font-semibold text-gray-800">Chat Partner</h2>
+          <h2 className="text-lg font-semibold text-gray-800">Chat Partner</h2>
           <p className="text-sm text-gray-500">Online</p>{" "}
           {/* Placeholder for status */}
         </div>
       </div>
 
       {/* Chat Content Area */}
-      <div className="basis-[77%] overflow-y-auto p-4 bg-gray-50">
+      <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
         <div className="space-y-4">
           {/* Example Messages */}
           <div className="flex justify-start">
@@ -62,7 +62,7 @@ export default function SingleChat() {
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder="Type a message..."
-            className="flex-1 rounded-full border border-gray-300 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="flex-1 rounded-full border border-gray-300 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-black text-black"
           />
           <button
             type="submit"

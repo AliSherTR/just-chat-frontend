@@ -48,7 +48,7 @@ export default function AppSidebar() {
           />
         ))}
       </SidebarContent>
-      <SidebarFooter className=" mb-6">
+      <SidebarFooter className=" mb-3">
         <Button variant={"outline"} className=" flex items-center gap-3">
           <span>
             <Plus />
