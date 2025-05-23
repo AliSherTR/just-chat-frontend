@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
 
     // Set access_token in HTTP-only cookie
     const nextResponse = NextResponse.json(
-      { message: data.message },
+      { message: data.message, token: data.data },
       { status: 200 }
     );
     nextResponse.cookies.set("access_token", data.data.access_token, {

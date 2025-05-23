@@ -1,4 +1,5 @@
-import React from "react";
+"use client";
+import React, { useEffect, useState } from "react";
 import {
   Sidebar,
   SidebarContent,
@@ -7,49 +8,104 @@ import {
 } from "./ui/sidebar";
 import SingleChatItem from "@/features/chat/components/single-chat-item";
 import { Button } from "./ui/button";
-import { Plus } from "lucide-react";
+import { LoaderIcon, Plus } from "lucide-react";
 import { Input } from "./ui/input";
-
-const chats = [
-  {
-    chatGroupId: "cmaxode9o0001fo0xyo2zej28",
-    partnerId: "cmaw3mkw50001gq0xd9mqb9hf",
-    partnerName: "bilal",
-    partnerProfilePic: null,
-    lastMessage: {
-      id: "164d35e4-5049-4067-864c-e8694bad5638",
-      content: "Hello from Socket One second message",
-      emoji: "",
-      createdAt: "2025-05-21T08:22:33.419Z",
-      isSentByUser: true,
-    },
-  },
-];
+import useChats from "@/features/chat/api/useChats";
 
 export default function AppSidebar() {
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [isMounted, setIsMounted] = useState(false);
+  const { chats, chatsLoading, chatsError } = useChats();
+  const filteredChats =
+    chats?.filter(
+      (chat) =>
+        chat.partnerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        chat.lastMessage?.content
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())
+    ) ?? [];
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return (
+      <Sidebar>
+        <SidebarHeader className="font-bold text-lg py-2 px-2">
+          <h1 className="text-2xl mb-3 mt-2">My Messages</h1>
+          <Input
+            placeholder="Search Conversations"
+            type="text"
+            className="placeholder:text-xs placeholder:font-normal font-normal"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </SidebarHeader>
+        <SidebarContent className="px-3 py-2">
+          <div className="flex items-center justify-center">
+            <LoaderIcon className="animate-spin h-6 w-6 text-gray-500" />
+            <span className="ml-2 text-sm text-gray-500">Loading Chats...</span>
+          </div>
+        </SidebarContent>
+        <SidebarFooter className="mb-3">
+          <Button variant="outline" className="flex items-center gap-3">
+            <span>
+              <Plus />
+            </span>
+            Add New Friend
+          </Button>
+        </SidebarFooter>
+      </Sidebar>
+    );
+  }
+
   return (
     <Sidebar>
-      <SidebarHeader className=" font-bold text-lg py-2 px-2">
-        <h1 className=" text-2xl mb-3 mt-2">My Messages</h1>
+      <SidebarHeader className="font-bold text-lg py-2 px-2">
+        <h1 className="text-2xl mb-3 mt-2">My Messages</h1>
         <Input
           placeholder="Search Conversations"
-          className=" placeholder:text-xs placeholder:font-normal font-normal"
+          type="text"
+          className="placeholder:text-xs placeholder:font-normal font-normal"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
         />
       </SidebarHeader>
-      <SidebarContent className=" px-3 py-2">
-        {chats.map((chat) => (
-          <SingleChatItem
-            key={chat.chatGroupId}
-            chatGroupId={chat.chatGroupId}
-            partnerId={chat.partnerId}
-            partnerProfilePic={chat.partnerProfilePic}
-            partnerName={chat.partnerName}
-            lastMessage={chat.lastMessage}
-          />
-        ))}
+      <SidebarContent className="px-3 py-2">
+        {chatsLoading ? (
+          <div className="flex items-center justify-center">
+            <LoaderIcon className="animate-spin h-6 w-6 text-gray-500" />
+            <span className="ml-2 text-sm text-gray-500">Loading Chats...</span>
+          </div>
+        ) : chatsError ? (
+          <p className="text-sm text-red-500">Error: {chatsError.message}</p>
+        ) : filteredChats.length > 0 ? (
+          filteredChats.map((chat) => (
+            <SingleChatItem
+              key={chat.chatGroupId}
+              chatGroupId={chat.chatGroupId}
+              partnerId={chat.partnerId}
+              partnerProfilePic={chat.partnerProfilePic}
+              partnerName={chat.partnerName}
+              lastMessage={
+                chat.lastMessage ?? {
+                  id: "",
+                  content: "",
+                  emoji: "",
+                  createdAt: "",
+                  isSentByUser: false,
+                }
+              }
+              unreadCount={chat.unreadCount}
+            />
+          ))
+        ) : (
+          <p className="text-sm text-gray-500">No conversations found</p>
+        )}
       </SidebarContent>
-      <SidebarFooter className=" mb-3">
-        <Button variant={"outline"} className=" flex items-center gap-3">
+      <SidebarFooter className="mb-3">
+        <Button variant="outline" className="flex items-center gap-3">
           <span>
             <Plus />
           </span>

@@ -14,9 +14,11 @@ import {
 } from "@/components/ui/alert-dialog";
 import LogoutModal from "@/features/auth/components/logout-modal";
 import { useTheme } from "next-themes";
+import { useUser } from "@/context/user.context";
 
 const AppHeader = () => {
   const { theme, setTheme } = useTheme();
+  const { user, loading } = useUser();
   return (
     <header className="bg-white shadow-md py-4">
       <div className="container mx-auto px-4 pe-8 flex items-center justify-end">
@@ -25,7 +27,7 @@ const AppHeader = () => {
             <div className="rounded-full bg-gray-200 w-8 h-8 flex items-center justify-center">
               <User className="h-4 w-4" />
             </div>
-            <span>Ali Sher Khan</span>
+            <span>{user?.name}</span>
           </DropdownMenuTrigger>
 
           <DropdownMenuContent className="w-[200px] mt-2 mr-2">

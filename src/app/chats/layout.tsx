@@ -1,6 +1,8 @@
 import AppHeader from "@/components/app-header";
 import AppSidebar from "@/components/app-sidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { SocketProvider } from "@/context/socket.context";
+import { UserProvider } from "@/context/user.context";
 import { Metadata } from "next";
 import React from "react";
 export const metadata: Metadata = {
@@ -14,13 +16,17 @@ export default function layout({
   children: React.ReactNode;
 }>) {
   return (
-    <SidebarProvider>
-      <AppSidebar />
+    <SocketProvider>
+      <UserProvider>
+        <SidebarProvider>
+          <AppSidebar />
 
-      <main className="w-full overflow-hidden">
-        <AppHeader />
-        {children}
-      </main>
-    </SidebarProvider>
+          <main className="w-full overflow-hidden">
+            <AppHeader />
+            {children}
+          </main>
+        </SidebarProvider>
+      </UserProvider>
+    </SocketProvider>
   );
 }

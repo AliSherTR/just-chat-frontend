@@ -29,7 +29,7 @@ export function useAuth() {
         throw new Error(errorData.error || "Login failed");
       }
       const data = await response.json();
-      localStorage.setItem("access_token", data.access_token);
+      localStorage.setItem("access_token", data.data);
       return data;
     } catch (error: any) {
       throw error;
@@ -71,7 +71,10 @@ export function useAuth() {
       throw new Error(errorData.error || "Signup failed");
     }
 
-    return response.json();
+    const data = await response.json();
+    console.log(data);
+    localStorage.setItem("access_token", data.token.access_token);
+    return data;
   }
 
   const loginMutation = useMutation({

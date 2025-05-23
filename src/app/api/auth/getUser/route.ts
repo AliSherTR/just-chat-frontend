@@ -1,7 +1,7 @@
-import { NextResponse, NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
-export async function POST() {
+export async function GET() {
   try {
     const API_BASE_URL = process.env.API_BASE_URL;
 
@@ -15,8 +15,8 @@ export async function POST() {
       headers["Authorization"] = `Bearer ${accessToken}`;
     }
 
-    const response = await fetch(`${API_BASE_URL}/auth/signout`, {
-      method: "POST",
+    const response = await fetch(`${API_BASE_URL}/auth/profile`, {
+      method: "GET",
       headers,
     });
 
@@ -24,16 +24,15 @@ export async function POST() {
 
     if (!response.ok || data.status !== "success") {
       return NextResponse.json(
-        { error: data.message || "Logout failed" },
+        { error: data.message },
         { status: response.status }
       );
     }
 
     const nextResponse = NextResponse.json(
-      { message: data.message },
+      { message: data.message, data: data.data },
       { status: 200 }
     );
-    nextResponse.cookies.delete("access_token");
     return nextResponse;
   } catch (error) {
     return NextResponse.json(
