@@ -53,8 +53,8 @@ export default function SingleChatItem({
 
   const truncateMessage = (content: string): string => {
     const words = content.split(" ");
-    if (words.length > 3) {
-      return words.slice(0, 3).join(" ") + "...";
+    if (words.length > 2) {
+      return words.slice(0, 2).join(" ") + "...";
     }
     return content;
   };

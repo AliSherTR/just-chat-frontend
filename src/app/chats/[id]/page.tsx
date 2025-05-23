@@ -5,49 +5,12 @@ import React, { useState, FormEvent, useEffect, useRef } from "react";
 import { Send } from "lucide-react";
 import { useSocket } from "@/context/socket.context";
 import { useUser } from "@/context/user.context";
-
-interface Message {
-  id: string;
-  senderId: string;
-  content: string;
-  emoji: string;
-  createdAt: string;
-  isRead: boolean;
-  isSentByUser: boolean;
-}
-
-interface SingleChat {
-  chatGroupId: string;
-  partner: {
-    id: string;
-    name: string;
-    profilePic: string | null;
-  };
-  messages: Message[];
-}
-
-interface SingleChatResponse {
-  status: string;
-  message: string;
-  data: SingleChat;
-  errors: string | null;
-}
-
-interface ChatUpdatedData {
-  chatGroupId: string;
-  partnerId: string;
-  partnerName: string;
-  partnerProfilePic: string | null;
-  lastMessage: {
-    id: string;
-    content: string;
-    emoji: string;
-    createdAt: string;
-    isSentByUser: boolean;
-    senderId: string;
-  };
-  unreadCount: number;
-}
+import type {
+  ChatUpdatedData,
+  Message,
+  SingleChat,
+  SingleChatResponse,
+} from "@/features/chat/types";
 
 export default function SingleChat() {
   const { user } = useUser();
@@ -64,6 +27,7 @@ export default function SingleChat() {
     null
   );
   const [message, setMessage] = useState("");
+  const [pendingMessages, setPendingMessages] = useState<Message[]>([]); // Track pending messages
   const { socket, isConnected } = useSocket();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -112,15 +76,10 @@ export default function SingleChat() {
 
   useEffect(() => {
     if (!socket || !isConnected || !chatGroupId) {
-      console.log("Socket not connected or no chatGroupId", {
-        isConnected,
-        chatGroupId,
-      });
       return;
     }
 
     socket.on("chatUpdated", (chatData: ChatUpdatedData) => {
-      console.log("Received chatUpdated event:", chatData);
       if (chatData.chatGroupId === chatGroupId) {
         setConversation((prev) => {
           if (!prev) {
@@ -128,22 +87,24 @@ export default function SingleChat() {
           }
           const newMessage: Message = {
             id: chatData.lastMessage.id,
-            // Assume the backend sends senderId in lastMessage
             senderId: chatData.lastMessage.senderId || chatData.partnerId,
             content: chatData.lastMessage.content,
-            emoji: chatData.lastMessage.emoji,
+            emoji: chatData.lastMessage.emoji || "",
             createdAt: chatData.lastMessage.createdAt,
             isRead: false,
-            // Check if the senderId matches the current user's ID
-            isSentByUser: chatData.lastMessage.isSentByUser,
+            isSentByUser: chatData.lastMessage.senderId === user?.id,
+            isPending: false,
           };
-          console.log("NEW MESSAGE", newMessage);
+
+          // Remove the pending message with the same content
+          setPendingMessages((prevPending) =>
+            prevPending.filter((msg) => msg.content !== newMessage.content)
+          );
 
           const messageExists = prev.messages.some(
             (msg) => msg.id === newMessage.id
           );
           if (messageExists) {
-            console.log("Message already exists, skipping:", newMessage.id);
             return prev;
           }
           const updatedMessages = [...prev.messages, newMessage];
@@ -162,25 +123,22 @@ export default function SingleChat() {
     });
 
     socket.on("error", (err: { message: string }) => {
-      console.error("WebSocket error:", err.message);
+      // Remove pending messages on error
+      setPendingMessages([]);
+      window.location.reload();
     });
 
     return () => {
-      console.log("Cleaning up socket listeners");
       socket.off("chatUpdated");
       socket.off("error");
     };
-  }, [socket, isConnected, chatGroupId]);
+  }, [socket, isConnected, chatGroupId, user?.id]);
 
   useEffect(() => {
-    if (messagesEndRef.current && conversation?.messages) {
-      console.log(
-        "Scrolling to latest message, message count:",
-        conversation.messages.length
-      );
+    if (messagesEndRef.current && (conversation?.messages || pendingMessages)) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [conversation?.messages]);
+  }, [conversation?.messages, pendingMessages]);
 
   const handleSendMessage = (e: FormEvent) => {
     e.preventDefault();
@@ -193,11 +151,27 @@ export default function SingleChat() {
       return;
     }
 
-    console.log("Sending message to recipient:", conversation.partner.id);
+    // Create a temporary message
+    const tempMessage: Message = {
+      id: `temp-${Date.now()}-${Math.random()}`, // Unique temporary ID
+      senderId: user?.id || "",
+      content: message,
+      emoji: "",
+      createdAt: new Date().toISOString(),
+      isRead: false,
+      isSentByUser: true,
+      isPending: true, // Flag for pending messages
+    };
+
+    // Add to pending messages
+    setPendingMessages((prev) => [...prev, tempMessage]);
+
+    // Emit the message to the server
     socket.emit("sendMessage", {
       recipientId: conversation.partner.id,
       content: message,
     });
+
     setMessage("");
   };
 
@@ -265,6 +239,7 @@ export default function SingleChat() {
       {/* Chat Content Area */}
       <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
         <div className="space-y-4">
+          {/* Render confirmed messages */}
           {conversation.messages.map((msg) => (
             <div
               key={msg.id}
@@ -286,6 +261,18 @@ export default function SingleChat() {
                     msg.isSentByUser ? "text-blue-100" : "text-gray-400"
                   }`}
                 >
+                  {formatTimestamp(msg.createdAt)}
+                </span>
+              </div>
+            </div>
+          ))}
+          {/* Render pending messages */}
+          {pendingMessages.map((msg) => (
+            <div key={msg.id} className="flex justify-end">
+              <div className="max-w-xs rounded-lg p-3 shadow-sm bg-blue-500 text-white opacity-60 blur-[2px]">
+                <p className="text-sm">{msg.content}</p>
+                {msg.emoji && <span className="text-sm">{msg.emoji}</span>}
+                <span className="text-xs text-blue-100">
                   {formatTimestamp(msg.createdAt)}
                 </span>
               </div>

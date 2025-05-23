@@ -3,41 +3,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useSocket } from "@/context/socket.context";
-
-// Define types for the API response
-interface Message {
-  id: string;
-  content: string;
-  emoji: string;
-  createdAt: string;
-  isSentByUser: boolean;
-}
-
-interface Chat {
-  chatGroupId: string;
-  partnerId: string;
-  partnerName: string;
-  partnerProfilePic: string | null;
-  lastMessage: Message | null;
-  unreadCount: number;
-}
-
-interface SingleChat {
-  chatGroupId: string;
-  partner: {
-    id: string;
-    name: string;
-    profilePic: string | null;
-  };
-  messages: Message[];
-}
-
-interface ChatsResponse {
-  status: string;
-  message: string;
-  data: Chat[];
-  errors: string | null;
-}
+import { Chat, ChatsResponse } from "../types";
 
 export default function useChats() {
   const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -84,7 +50,6 @@ export default function useChats() {
     if (!socket || !isConnected) return;
 
     socket.on("chatUpdated", (chat: Chat) => {
-      console.log("socket chatUpdated:", chat);
       queryClient.setQueryData(["chats"], (oldData: Chat[] | undefined) => {
         if (!oldData) return [chat];
         const existingChatIndex = oldData.findIndex(

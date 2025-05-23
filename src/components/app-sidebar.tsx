@@ -11,6 +11,13 @@ import { Button } from "./ui/button";
 import { LoaderIcon, Plus } from "lucide-react";
 import { Input } from "./ui/input";
 import useChats from "@/features/chat/api/useChats";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "./ui/alert-dialog";
+import NewChatModal from "@/features/chat/components/new-chat-modal";
 
 export default function AppSidebar() {
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -105,12 +112,21 @@ export default function AppSidebar() {
         )}
       </SidebarContent>
       <SidebarFooter className="mb-3">
-        <Button variant="outline" className="flex items-center gap-3">
-          <span>
-            <Plus />
-          </span>
-          Add New Friend
-        </Button>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="outline" className="flex items-center gap-3">
+              <span>
+                <Plus />
+              </span>
+              Add New Friend
+            </Button>
+          </AlertDialogTrigger>
+
+          <AlertDialogContent>
+            <AlertDialogTitle>Start a new Conversation</AlertDialogTitle>
+            <NewChatModal />
+          </AlertDialogContent>
+        </AlertDialog>
       </SidebarFooter>
     </Sidebar>
   );
