@@ -2,7 +2,7 @@
 
 import { useParams } from "next/navigation";
 import React, { useState, FormEvent, useEffect, useRef } from "react";
-import { Send } from "lucide-react";
+import { CheckCheck, Send } from "lucide-react";
 import { useSocket } from "@/context/socket.context";
 import { useUser } from "@/context/user.context";
 import type {
@@ -11,10 +11,12 @@ import type {
   SingleChat,
   SingleChatResponse,
 } from "@/features/chat/types";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function SingleChat() {
   const { user } = useUser();
   const params = useParams();
+  const queryClient = useQueryClient();
   const chatGroupId =
     typeof params?.id === "string"
       ? params.id
@@ -27,7 +29,7 @@ export default function SingleChat() {
     null
   );
   const [message, setMessage] = useState("");
-  const [pendingMessages, setPendingMessages] = useState<Message[]>([]); // Track pending messages
+  const [pendingMessages, setPendingMessages] = useState<Message[]>([]);
   const { socket, isConnected } = useSocket();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -63,10 +65,56 @@ export default function SingleChat() {
 
       setConversation(data.data);
       setConversationError(null);
+
+      // Mark messages as read after fetching conversation
+      await markMessagesAsRead();
     } catch (error: any) {
       setConversationError(error.message || "Failed to fetch chat");
     } finally {
       setConversationLoading(false);
+    }
+  }
+
+  async function markMessagesAsRead() {
+    if (!token || !chatGroupId) {
+      setConversationError("No access token or chat group ID");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `${API_URL}/chats/markMessagesAsRead/?id=${chatGroupId}`,
+        {
+          method: "PATCH", // Assuming the API uses POST to mark messages as read
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to mark messages as read");
+      }
+
+      const data = await response.json();
+
+      if (data.status !== "success") {
+        throw new Error(data.message || "Failed to mark messages as read");
+      }
+      queryClient.invalidateQueries({ queryKey: ["chats"] });
+      setConversation((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          messages: prev.messages.map((msg) => ({
+            ...msg,
+            isRead: true,
+          })),
+        };
+      });
+    } catch (error: any) {
+      console.error("Error marking messages as read:", error.message);
     }
   }
 
@@ -96,7 +144,6 @@ export default function SingleChat() {
             isPending: false,
           };
 
-          // Remove the pending message with the same content
           setPendingMessages((prevPending) =>
             prevPending.filter((msg) => msg.content !== newMessage.content)
           );
@@ -123,7 +170,6 @@ export default function SingleChat() {
     });
 
     socket.on("error", (err: { message: string }) => {
-      // Remove pending messages on error
       setPendingMessages([]);
       window.location.reload();
     });
@@ -151,22 +197,19 @@ export default function SingleChat() {
       return;
     }
 
-    // Create a temporary message
     const tempMessage: Message = {
-      id: `temp-${Date.now()}-${Math.random()}`, // Unique temporary ID
+      id: `temp-${Date.now()}-${Math.random()}`,
       senderId: user?.id || "",
       content: message,
       emoji: "",
       createdAt: new Date().toISOString(),
       isRead: false,
       isSentByUser: true,
-      isPending: true, // Flag for pending messages
+      isPending: true,
     };
 
-    // Add to pending messages
     setPendingMessages((prev) => [...prev, tempMessage]);
 
-    // Emit the message to the server
     socket.emit("sendMessage", {
       recipientId: conversation.partner.id,
       content: message,
@@ -239,7 +282,6 @@ export default function SingleChat() {
       {/* Chat Content Area */}
       <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
         <div className="space-y-4">
-          {/* Render confirmed messages */}
           {conversation.messages.map((msg) => (
             <div
               key={msg.id}
@@ -257,16 +299,20 @@ export default function SingleChat() {
                 <p className="text-sm">{msg.content}</p>
                 {msg.emoji && <span className="text-sm">{msg.emoji}</span>}
                 <span
-                  className={`text-xs ${
+                  className={`text-xs flex items-center mt-2 ${
                     msg.isSentByUser ? "text-blue-100" : "text-gray-400"
                   }`}
                 >
                   {formatTimestamp(msg.createdAt)}
+                  <span className=" mx-3">
+                    {msg.isRead && !msg.isSentByUser && (
+                      <CheckCheck className="ms-auto" size={15} color="blue" />
+                    )}
+                  </span>
                 </span>
               </div>
             </div>
           ))}
-          {/* Render pending messages */}
           {pendingMessages.map((msg) => (
             <div key={msg.id} className="flex justify-end">
               <div className="max-w-xs rounded-lg p-3 shadow-sm bg-blue-500 text-white opacity-60 blur-[2px]">
