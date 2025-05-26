@@ -38,6 +38,7 @@ export interface ChatUpdatedData {
     createdAt: string;
     isSentByUser: boolean;
     senderId: string;
+    tempId: string | null;
   };
   unreadCount: number;
 }
@@ -49,6 +50,7 @@ export interface Chat {
   partnerProfilePic: string | null;
   lastMessage: Message | null;
   unreadCount: number;
+  templateId: string | null;
 }
 
 export interface ChatsResponse {

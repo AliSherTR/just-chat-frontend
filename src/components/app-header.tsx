@@ -21,7 +21,7 @@ const AppHeader = () => {
   const { theme, setTheme } = useTheme();
   const { user, loading } = useUser();
   return (
-    <header className="bg-white shadow-md py-4">
+    <header className="bg-white shadow-md border-b py-4">
       <div className="container mx-auto px-4 pe-8 flex items-center">
         <div className=" justify-self-start md:hidden">
           <SidebarTrigger className="" />
