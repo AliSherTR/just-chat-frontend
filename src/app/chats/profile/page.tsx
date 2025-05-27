@@ -6,7 +6,7 @@ import React from "react";
 export default function ProfilePage() {
   const { user } = useUser();
   return (
-    <div className=" w-full h-full  px-4 py-8">
+    <div className=" w-full h-full  px-4 py-8 bg-white">
       <div className=" mt-4 ">
         {user?.image ? (
           <img
@@ -19,7 +19,7 @@ export default function ProfilePage() {
             <span className="text-2xl text-gray-500">B</span>
           </div>
         )}
-        <div className=" grid w-[300px] md:w-full  md:grid-cols-2 grid-cols-1 mx-auto md:mx-0 gap-y-2.5 mt-4 text-base">
+        <div className=" grid w-[300px] md:w-full  md:grid-cols-2 grid-cols-1 mx-auto md:mx-0 gap-y-2.5 mt-4 text-base text-black">
           <div className=" flex items-center md:justify-start justify-center gap-2 mt-4">
             <User />
             <h1 className="  capitalize "> {user?.name}</h1>
