@@ -11,7 +11,6 @@ import type {
   SingleChat,
   SingleChatResponse,
 } from "@/features/chat/types";
-import { toast } from "sonner";
 
 export default function useSingleChat() {
   const { user } = useUser();
@@ -178,7 +177,6 @@ export default function useSingleChat() {
 
     socket.on("error", (err: { message: string }) => {
       setPendingMessages([]);
-      toast.error(`Error: ${err}`);
       return;
     });
 

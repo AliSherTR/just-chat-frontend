@@ -13,6 +13,7 @@ import { useSocket } from "@/context/socket.context";
 import { useUser } from "@/context/user.context";
 import { useRouter } from "next/navigation";
 import type { Message } from "@/features/chat/types";
+import { toast } from "sonner";
 
 export default function NewChatModal({
   onMessageSent,
@@ -59,6 +60,7 @@ export default function NewChatModal({
 
     socket.once("error", (err: { message: string }) => {
       setError(err.message);
+      toast.error(`Error: ${err.message}`);
     });
 
     // Clear inputs
