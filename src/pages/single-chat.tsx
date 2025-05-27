@@ -1,5 +1,7 @@
-import { CheckCheck, Send } from "lucide-react";
+import { ArrowLeft, CheckCheck, Send } from "lucide-react";
 import useSingleChat from "@/features/chat/api/useSingleChat";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 
 export default function SingleChat() {
   const {
@@ -14,6 +16,8 @@ export default function SingleChat() {
     formatTimestamp,
   } = useSingleChat();
 
+  const router = useRouter();
+
   if (conversationLoading) {
     return (
       <div className="flex items-center justify-center h-full bg-white text-black">
@@ -24,8 +28,22 @@ export default function SingleChat() {
 
   if (!conversation || conversationError) {
     return (
-      <div className="flex items-center justify-center h-full bg-white text-black">
-        <span>{conversationError || "No conversation found"}</span>
+      <div className="flex flex-col items-center justify-center h-full bg-white text-black">
+        <span className=" mb-3">
+          {conversationError || "No conversation found"}
+        </span>
+        <Button
+          variant={"outline"}
+          className=" flex gap-3 items-center"
+          onClick={() => router.push("/chats")}
+        >
+          <ArrowLeft
+            className="h-4 w-4 dark:text-black text-white"
+            color="black"
+          />
+
+          <span>Back to Chats</span>
+        </Button>
       </div>
     );
   }
@@ -33,7 +51,12 @@ export default function SingleChat() {
   return (
     <div className="flex flex-col h-[calc(100vh-64px)] bg-gray-100">
       {/* Chat Header */}
-      <div className="shadow-sm p-4 flex items-center shrink-0 border-b bg-white">
+      <div className="shadow-sm p-4 flex items-center gap-2 shrink-0 border-b bg-white">
+        <ArrowLeft
+          className="h-4 w-4 dark:text-black text-white cursor-pointer"
+          color="black"
+          onClick={() => router.push("/chats")}
+        />
         <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
           {conversation.partner.profilePic ? (
             <img
@@ -47,7 +70,7 @@ export default function SingleChat() {
             </span>
           )}
         </div>
-        <div className="ml-3">
+        <div className="ml-2">
           <h2 className="text-lg font-semibold text-gray-800">
             {conversation.partner.name}
           </h2>

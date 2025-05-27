@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
@@ -16,6 +16,7 @@ type SignUpRequestParams = {
 
 export function useAuth() {
   const router = useRouter();
+  const queyrClient = useQueryClient();
   async function loginUser({ email, password }: LoginRequestParams) {
     try {
       const response = await fetch("/api/auth/login", {
@@ -59,7 +60,7 @@ export function useAuth() {
     firstName,
     lastName,
   }: SignUpRequestParams) {
-    const name = firstName + lastName;
+    const name = firstName + ` ${lastName}`;
     const response = await fetch("/api/auth/signup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -109,6 +110,7 @@ export function useAuth() {
         },
       });
       router.push("/auth/login");
+      queyrClient.removeQueries({ queryKey: ["chats"] });
     },
     onError: (error) => {
       toast.error(error.message, {

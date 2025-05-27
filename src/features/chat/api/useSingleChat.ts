@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSocket } from "@/context/socket.context";
@@ -29,6 +29,7 @@ export default function useSingleChat() {
       : "";
   const [message, setMessage] = useState("");
   const [pendingMessages, setPendingMessages] = useState<Message[]>([]);
+  const router = useRouter();
 
   async function getSingleConversation(): Promise<SingleChat> {
     if (!token || !chatGroupId) {
@@ -44,13 +45,14 @@ export default function useSingleChat() {
     });
 
     if (!response.ok) {
-      throw new Error("Failed to fetch chat");
+      queryClient.invalidateQueries({ queryKey: ["chats"] });
+      throw new Error("Chat seems to be deleted or does not exist");
     }
 
     const data: SingleChatResponse = await response.json();
 
     if (data.status !== "success") {
-      throw new Error(data.message || "Failed to fetch chat");
+      throw new Error(data.message || "This chat does not exist");
     }
 
     await markMessagesAsRead();

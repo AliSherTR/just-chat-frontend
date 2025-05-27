@@ -1,9 +1,11 @@
 "use client";
 
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useSocket } from "@/context/socket.context";
 import { Chat, ChatsResponse } from "../types";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export default function useChats() {
   const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -11,6 +13,7 @@ export default function useChats() {
     typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
   const queryClient = useQueryClient();
   const { socket, isConnected } = useSocket();
+  const router = useRouter();
 
   async function getChats(): Promise<Chat[]> {
     if (!token) {
@@ -37,6 +40,42 @@ export default function useChats() {
 
     return data.data;
   }
+
+  async function deleteChat(chatGroupId: string): Promise<void> {
+    if (!token) {
+      throw new Error("No access token found");
+    }
+
+    const response = await fetch(`${API_URL}/chats/${chatGroupId}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to delete chat");
+    }
+
+    const data = await response.json();
+
+    if (data.status !== "success") {
+      throw new Error(data.message || "Failed to delete chat");
+    }
+  }
+
+  const deleteChatMutation = useMutation({
+    mutationFn: deleteChat,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["chats"] });
+      toast.success("Chat deleted successfully");
+      router.push("/chats");
+    },
+    onError: (error: Error) => {
+      toast.error(`Error deleting chat: ${error.message}`);
+    },
+  });
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["chats"],
@@ -89,5 +128,10 @@ export default function useChats() {
     chatsLoading: isLoading,
     chatsError: error,
     refetch,
+
+    deleteChat: deleteChatMutation.mutate,
+    deleteChatLoading: deleteChatMutation.isPending,
+    deleteChatError: deleteChatMutation.error,
+    deleteChatSuccess: deleteChatMutation.isSuccess,
   };
 }

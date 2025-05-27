@@ -16,6 +16,8 @@ import LogoutModal from "@/features/auth/components/logout-modal";
 import { useTheme } from "next-themes";
 import { useUser } from "@/context/user.context";
 import { SidebarTrigger } from "./ui/sidebar";
+import Link from "next/link";
+import { use } from "react";
 
 const AppHeader = () => {
   const { theme, setTheme } = useTheme();
@@ -32,17 +34,23 @@ const AppHeader = () => {
           <DropdownMenu>
             <DropdownMenuTrigger className=" flex items-center gap-2 dark:text-black ms-auto">
               <div className="rounded-full bg-gray-200 w-8 h-8 flex items-center justify-center">
-                <User className="h-4 w-4" />
+                {user?.image ? (
+                  <img src={user.image} alt="" className=" rounded-full" />
+                ) : (
+                  <User className="h-4 w-4" />
+                )}
               </div>
               <span>{user?.name}</span>
             </DropdownMenuTrigger>
 
             <DropdownMenuContent className="w-[200px] mt-2 mr-2">
               <DropdownMenuLabel>Account</DropdownMenuLabel>
-              <DropdownMenuItem className="flex items-center gap-2">
-                <User className="h-4 w-4" />
-                <span>Profile</span>
-              </DropdownMenuItem>
+              <Link href="/chats/profile">
+                <DropdownMenuItem className="flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  <span>Profile</span>
+                </DropdownMenuItem>
+              </Link>
 
               <DropdownMenuSeparator />
               <DropdownMenuLabel>Preferences</DropdownMenuLabel>
