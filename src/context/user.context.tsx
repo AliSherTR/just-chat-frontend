@@ -20,6 +20,7 @@ type UserContextType = {
   user: User | null;
   loading: boolean;
   error: string | null;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
 };
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -54,7 +55,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <UserContext.Provider value={{ user, loading, error }}>
+    <UserContext.Provider value={{ user, loading, error, setUser }}>
       {children}
     </UserContext.Provider>
   );

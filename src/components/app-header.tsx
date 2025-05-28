@@ -35,7 +35,11 @@ const AppHeader = () => {
             <DropdownMenuTrigger className=" flex items-center gap-2 dark:text-black ms-auto">
               <div className="rounded-full bg-gray-200 w-8 h-8 flex items-center justify-center">
                 {user?.image ? (
-                  <img src={user.image} alt="" className=" rounded-full" />
+                  <img
+                    src={user.image}
+                    alt=""
+                    className=" rounded-full h-10 w-10"
+                  />
                 ) : (
                   <User className="h-4 w-4" />
                 )}
