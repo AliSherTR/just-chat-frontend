@@ -1,12 +1,27 @@
 "use client";
+import { Button } from "@/components/ui/button";
 import { useUser } from "@/context/user.context";
-import { Mail, User } from "lucide-react";
+import { ArrowLeft, Mail, User } from "lucide-react";
+import { useRouter } from "next/navigation";
 import React from "react";
 
 export default function ProfilePage() {
   const { user } = useUser();
+  const router = useRouter();
   return (
     <div className=" w-full h-full  px-4 py-8 bg-white">
+      <Button
+        variant={"outline"}
+        className=" flex gap-3 items-center mb-4"
+        onClick={() => router.push("/chats")}
+      >
+        <ArrowLeft
+          className="h-4 w-4 dark:text-black text-white"
+          color="black"
+        />
+
+        <span>Back to Chats</span>
+      </Button>
       <div className=" mt-4 ">
         {user?.image ? (
           <img
